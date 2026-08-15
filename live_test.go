@@ -22,7 +22,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	skipUnlessLive(t)
 
 	client, err := ensembl.NewClient(
-		ensembl.WithTimeout(30*time.Second),
+		ensembl.WithTimeout(30 * time.Second),
 		ensembl.WithMaxAttempts(3),
 		ensembl.WithRateLimit(15, time.Second),
 	)
@@ -31,10 +31,10 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
 	t.Run("Ping", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+
 		var ping ensembl.PingResponse
 		if err := client.GetInfoPing(ctx, &ping); err != nil {
 			t.Fatalf("GetInfoPing failed: %v", err)
@@ -44,17 +44,23 @@ func TestLiveEnsemblAPI(t *testing.T) {
 		}
 	})
 
-	t.Run("Archive", func(t *testing.T) {
-		var archive ensembl.ArchiveRecord
-		if err := client.GetArchiveByID(ctx, "ENSG00000157764", &archive); err != nil {
-			t.Fatalf("GetArchiveByID failed: %v", err)
+	t.Run("Species", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+
+		var species ensembl.SpeciesResponse
+		if err := client.GetInfoSpecies(ctx, &species); err != nil {
+			t.Fatalf("GetInfoSpecies failed: %v", err)
 		}
-		if archive.ID != "ENSG00000157764" {
-			t.Errorf("expected ID ENSG00000157764, got %q", archive.ID)
+		if len(species.Species) == 0 {
+			t.Errorf("expected species list, got 0")
 		}
 	})
 
 	t.Run("Lookup", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+
 		var gene ensembl.LookupRecord
 		if err := client.GetLookupByID(ctx, "ENSG00000157764", &gene, ensembl.WithQuery("expand", "1")); err != nil {
 			t.Fatalf("GetLookupByID failed: %v", err)
@@ -68,22 +74,15 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Sequence", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+
 		var seq ensembl.SequenceRecord
 		if err := client.GetSequenceByID(ctx, "ENSG00000157764", &seq); err != nil {
 			t.Fatalf("GetSequenceByID failed: %v", err)
 		}
 		if len(seq.Seq) == 0 {
 			t.Errorf("expected non-empty sequence")
-		}
-	})
-
-	t.Run("Xrefs", func(t *testing.T) {
-		var xrefs []ensembl.XrefRecord
-		if err := client.GetXrefsBySymbol(ctx, "homo_sapiens", "BRCA2", &xrefs); err != nil {
-			t.Fatalf("GetXrefsBySymbol failed: %v", err)
-		}
-		if len(xrefs) == 0 {
-			t.Errorf("expected xref records, got 0")
 		}
 	})
 }

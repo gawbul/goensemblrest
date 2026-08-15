@@ -95,12 +95,12 @@ type ArchiveRecord struct {
 	ID        string   `json:"id"`
 	Latest    string   `json:"latest,omitempty"`
 	Version   int      `json:"version,omitempty"`
-	Release   int      `json:"release,omitempty"`
+	Release   string   `json:"release,omitempty"`
 	Assembly  string   `json:"assembly,omitempty"`
-	Peptide   string   `json:"peptide,omitempty"`
+	Peptide   *string  `json:"peptide,omitempty"`
 	Type      string   `json:"type,omitempty"`
-	Possible  []string `json:"possible,omitempty"`
-	IsCurrent int      `json:"is_current,omitempty"`
+	Possible  []string `json:"possible_replacement,omitempty"`
+	IsCurrent string   `json:"is_current,omitempty"`
 }
 
 // LookupRecord represents a genomic feature returned by /lookup endpoints.
@@ -121,7 +121,7 @@ type LookupRecord struct {
 	Assembly     string          `json:"assembly_name,omitempty"`
 	CanonicalTx  string          `json:"canonical_transcript,omitempty"`
 	Transcripts  []LookupRecord  `json:"Transcript,omitempty"`
-	Translations []LookupRecord  `json:"Translation,omitempty"`
+	Translation  *LookupRecord   `json:"Translation,omitempty"`
 	Exons        []LookupRecord  `json:"Exon,omitempty"`
 	Extra        json.RawMessage `json:"-"`
 }
