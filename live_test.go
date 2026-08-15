@@ -4,7 +4,6 @@ package goensemblrest_test
 
 import (
 	"context"
-	"errors"
 	"os"
 	"testing"
 	"time"
@@ -17,22 +16,6 @@ func skipUnlessLive(t *testing.T) {
 	if os.Getenv("ENSEMBL_LIVE_TESTS") == "" {
 		t.Skip("Skipping live Ensembl REST test: ENSEMBL_LIVE_TESTS is not set")
 	}
-}
-
-func handleLiveErr(t *testing.T, op string, err error) {
-	t.Helper()
-	if err == nil {
-		return
-	}
-	if errors.Is(err, ensembl.ErrInternalServer) ||
-		errors.Is(err, ensembl.ErrServiceUnavailable) ||
-		errors.Is(err, ensembl.ErrTimeout) ||
-		errors.Is(err, ensembl.ErrMaxRetriesReached) ||
-		errors.Is(err, context.DeadlineExceeded) ||
-		errors.Is(err, context.Canceled) {
-		t.Skipf("%s: Ensembl public server is temporarily unavailable or degraded: %v", op, err)
-	}
-	t.Fatalf("%s failed: %v", op, err)
 }
 
 func TestLiveEnsemblAPI(t *testing.T) {
@@ -55,7 +38,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 
 		var ping ensembl.PingResponse
 		if err := client.GetInfoPing(ctx, &ping); err != nil {
-			handleLiveErr(t, "GetInfoPing", err)
+			t.Fatalf("GetInfoPing failed: %v", err)
 		}
 		if ping.Ping != 1 {
 			t.Errorf("expected ping: 1, got %d", ping.Ping)
@@ -68,7 +51,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 
 		var species ensembl.SpeciesResponse
 		if err := client.GetInfoSpecies(ctx, &species); err != nil {
-			handleLiveErr(t, "GetInfoSpecies", err)
+			t.Fatalf("GetInfoSpecies failed: %v", err)
 		}
 		if len(species.Species) == 0 {
 			t.Errorf("expected species list, got 0")
@@ -81,7 +64,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 
 		var gene ensembl.LookupRecord
 		if err := client.GetLookupByID(ctx, "ENSG00000157764", &gene); err != nil {
-			handleLiveErr(t, "GetLookupByID", err)
+			t.Fatalf("GetLookupByID failed: %v", err)
 		}
 		if gene.ID != "ENSG00000157764" {
 			t.Errorf("expected ID ENSG00000157764, got %q", gene.ID)
@@ -97,7 +80,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 
 		var seq ensembl.SequenceRecord
 		if err := client.GetSequenceByID(ctx, "ENST00000288602", &seq); err != nil {
-			handleLiveErr(t, "GetSequenceByID", err)
+			t.Fatalf("GetSequenceByID failed: %v", err)
 		}
 		if len(seq.Seq) == 0 {
 			t.Errorf("expected non-empty sequence")
@@ -110,7 +93,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 
 		var xrefs []ensembl.XrefRecord
 		if err := client.GetXrefsByID(ctx, "ENST00000288602", &xrefs); err != nil {
-			handleLiveErr(t, "GetXrefsByID", err)
+			t.Fatalf("GetXrefsByID failed: %v", err)
 		}
 		if len(xrefs) == 0 {
 			t.Errorf("expected xref records, got 0")
