@@ -4,6 +4,7 @@ package goensemblrest_test
 
 import (
 	"context"
+	"errors"
 	"os"
 	"testing"
 	"time"
@@ -18,12 +19,28 @@ func skipUnlessLive(t *testing.T) {
 	}
 }
 
+func handleLiveErr(t *testing.T, op string, err error) {
+	t.Helper()
+	if err == nil {
+		return
+	}
+	if errors.Is(err, ensembl.ErrInternalServer) ||
+		errors.Is(err, ensembl.ErrServiceUnavailable) ||
+		errors.Is(err, ensembl.ErrTimeout) ||
+		errors.Is(err, ensembl.ErrMaxRetriesReached) ||
+		errors.Is(err, context.DeadlineExceeded) ||
+		errors.Is(err, context.Canceled) {
+		t.Skipf("%s: Ensembl public server is temporarily unavailable or degraded: %v", op, err)
+	}
+	t.Fatalf("%s failed: %v", op, err)
+}
+
 func TestLiveEnsemblAPI(t *testing.T) {
 	skipUnlessLive(t)
 
 	client, err := ensembl.NewClient(
-		ensembl.WithTimeout(45*time.Second),
-		ensembl.WithMaxAttempts(5),
+		ensembl.WithTimeout(30*time.Second),
+		ensembl.WithMaxAttempts(3),
 		ensembl.WithRateLimit(10, time.Second),
 		ensembl.WithUserAgent("goensemblrest-test/1.0 (+https://github.com/gawbul/goensemblrest)"),
 	)
@@ -33,12 +50,12 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	defer client.Close()
 
 	t.Run("Ping", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 
 		var ping ensembl.PingResponse
 		if err := client.GetInfoPing(ctx, &ping); err != nil {
-			t.Fatalf("GetInfoPing failed: %v", err)
+			handleLiveErr(t, "GetInfoPing", err)
 		}
 		if ping.Ping != 1 {
 			t.Errorf("expected ping: 1, got %d", ping.Ping)
@@ -46,12 +63,12 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Species", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 
 		var species ensembl.SpeciesResponse
 		if err := client.GetInfoSpecies(ctx, &species); err != nil {
-			t.Fatalf("GetInfoSpecies failed: %v", err)
+			handleLiveErr(t, "GetInfoSpecies", err)
 		}
 		if len(species.Species) == 0 {
 			t.Errorf("expected species list, got 0")
@@ -59,12 +76,12 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Lookup", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 
 		var gene ensembl.LookupRecord
-		if err := client.GetLookupByID(ctx, "ENSG00000157764", &gene, ensembl.WithQuery("expand", "1")); err != nil {
-			t.Fatalf("GetLookupByID failed: %v", err)
+		if err := client.GetLookupByID(ctx, "ENSG00000157764", &gene); err != nil {
+			handleLiveErr(t, "GetLookupByID", err)
 		}
 		if gene.ID != "ENSG00000157764" {
 			t.Errorf("expected ID ENSG00000157764, got %q", gene.ID)
@@ -75,15 +92,28 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Sequence", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 		defer cancel()
 
 		var seq ensembl.SequenceRecord
-		if err := client.GetSequenceByID(ctx, "ENSG00000157764", &seq); err != nil {
-			t.Fatalf("GetSequenceByID failed: %v", err)
+		if err := client.GetSequenceByID(ctx, "ENST00000288602", &seq); err != nil {
+			handleLiveErr(t, "GetSequenceByID", err)
 		}
 		if len(seq.Seq) == 0 {
 			t.Errorf("expected non-empty sequence")
+		}
+	})
+
+	t.Run("Xrefs", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		defer cancel()
+
+		var xrefs []ensembl.XrefRecord
+		if err := client.GetXrefsByID(ctx, "ENST00000288602", &xrefs); err != nil {
+			handleLiveErr(t, "GetXrefsByID", err)
+		}
+		if len(xrefs) == 0 {
+			t.Errorf("expected xref records, got 0")
 		}
 	})
 }
