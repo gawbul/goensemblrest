@@ -22,9 +22,10 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	skipUnlessLive(t)
 
 	client, err := ensembl.NewClient(
-		ensembl.WithTimeout(30*time.Second),
-		ensembl.WithMaxAttempts(3),
-		ensembl.WithRateLimit(15, time.Second),
+		ensembl.WithTimeout(45*time.Second),
+		ensembl.WithMaxAttempts(5),
+		ensembl.WithRateLimit(10, time.Second),
+		ensembl.WithUserAgent("goensemblrest-test/1.0 (+https://github.com/gawbul/goensemblrest)"),
 	)
 	if err != nil {
 		t.Fatalf("failed to initialize live client: %v", err)
@@ -32,7 +33,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	defer client.Close()
 
 	t.Run("Ping", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		var ping ensembl.PingResponse
@@ -45,7 +46,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Species", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		var species ensembl.SpeciesResponse
@@ -58,7 +59,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Lookup", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		var gene ensembl.LookupRecord
@@ -74,7 +75,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Sequence", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		var seq ensembl.SequenceRecord

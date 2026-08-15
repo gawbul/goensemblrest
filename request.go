@@ -69,7 +69,11 @@ func (c *Client) buildURL(resolvedPath string, query url.Values) (*url.URL, erro
 
 // isTransientError checks if a status code or body message is known to be transient and retryable.
 func isTransientError(statusCode int, msg string) bool {
-	if statusCode == http.StatusInternalServerError || statusCode == http.StatusRequestTimeout {
+	if statusCode == http.StatusInternalServerError ||
+		statusCode == http.StatusRequestTimeout ||
+		statusCode == http.StatusServiceUnavailable ||
+		statusCode == http.StatusBadGateway ||
+		statusCode == http.StatusGatewayTimeout {
 		return true
 	}
 	if statusCode == http.StatusBadRequest {
@@ -181,16 +185,15 @@ func (c *Client) executeRequest(
 				Message:    fmt.Sprintf("network connection error: %v", err),
 			}
 		} else {
-			defer resp.Body.Close()
-
-			// Parse and update rate limit state from response headers
-			rateInfo := c.limiter.UpdateFromHeaders(resp.Header)
-
 			respBody, readErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
 			if readErr != nil {
 				lastErr = readErr
 				continue
 			}
+
+			// Parse and update rate limit state from response headers
+			rateInfo := c.limiter.UpdateFromHeaders(resp.Header)
 
 			// Handle successful response (2xx)
 			if resp.StatusCode >= 200 && resp.StatusCode < 300 {

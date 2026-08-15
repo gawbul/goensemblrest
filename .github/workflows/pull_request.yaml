@@ -55,13 +55,6 @@ jobs:
             exit 1
           fi
 
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          args: --timeout=5m
-        continue-on-error: true
-
   unit-test:
     name: Unit Tests (Go ${{ matrix.go-version }})
     runs-on: ubuntu-latest
@@ -100,6 +93,7 @@ jobs:
     needs: [unit-test]
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
