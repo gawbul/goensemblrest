@@ -33,7 +33,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	defer client.Close()
 
 	t.Run("Ping", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
 
 		var ping ensembl.PingResponse
@@ -46,7 +46,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Species", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
 
 		var species ensembl.SpeciesResponse
@@ -59,7 +59,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Lookup", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
 
 		var gene ensembl.LookupRecord
@@ -75,7 +75,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Sequence", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
 
 		var seq ensembl.SequenceRecord
@@ -88,7 +88,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	})
 
 	t.Run("Xrefs", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
 
 		var xrefs []ensembl.XrefRecord
