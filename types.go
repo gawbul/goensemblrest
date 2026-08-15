@@ -105,25 +105,25 @@ type ArchiveRecord struct {
 
 // LookupRecord represents a genomic feature returned by /lookup endpoints.
 type LookupRecord struct {
-	ID           string          `json:"id"`
-	ObjectType   string          `json:"object_type,omitempty"`
-	Species      string          `json:"species,omitempty"`
-	DisplayName  string          `json:"display_name,omitempty"`
-	Description  string          `json:"description,omitempty"`
-	Biotype      string          `json:"biotype,omitempty"`
-	SeqRegion    string          `json:"seq_region_name,omitempty"`
-	Start        int             `json:"start,omitempty"`
-	End          int             `json:"end,omitempty"`
-	Strand       int             `json:"strand,omitempty"`
-	Source       string          `json:"source,omitempty"`
-	Version      int             `json:"version,omitempty"`
-	DBType       string          `json:"db_type,omitempty"`
-	Assembly     string          `json:"assembly_name,omitempty"`
-	CanonicalTx  string          `json:"canonical_transcript,omitempty"`
-	Transcripts  []LookupRecord  `json:"Transcript,omitempty"`
-	Translation  *LookupRecord   `json:"Translation,omitempty"`
-	Exons        []LookupRecord  `json:"Exon,omitempty"`
-	Extra        json.RawMessage `json:"-"`
+	ID          string          `json:"id"`
+	ObjectType  string          `json:"object_type,omitempty"`
+	Species     string          `json:"species,omitempty"`
+	DisplayName string          `json:"display_name,omitempty"`
+	Description string          `json:"description,omitempty"`
+	Biotype     string          `json:"biotype,omitempty"`
+	SeqRegion   string          `json:"seq_region_name,omitempty"`
+	Start       int             `json:"start,omitempty"`
+	End         int             `json:"end,omitempty"`
+	Strand      int             `json:"strand,omitempty"`
+	Source      string          `json:"source,omitempty"`
+	Version     int             `json:"version,omitempty"`
+	DBType      string          `json:"db_type,omitempty"`
+	Assembly    string          `json:"assembly_name,omitempty"`
+	CanonicalTx string          `json:"canonical_transcript,omitempty"`
+	Transcripts []LookupRecord  `json:"Transcript,omitempty"`
+	Translation *LookupRecord   `json:"Translation,omitempty"`
+	Exons       []LookupRecord  `json:"Exon,omitempty"`
+	Extra       json.RawMessage `json:"-"`
 }
 
 // SequenceRecord represents sequence data returned by /sequence endpoints.

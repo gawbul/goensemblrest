@@ -22,7 +22,7 @@ func TestLiveEnsemblAPI(t *testing.T) {
 	skipUnlessLive(t)
 
 	client, err := ensembl.NewClient(
-		ensembl.WithTimeout(30 * time.Second),
+		ensembl.WithTimeout(30*time.Second),
 		ensembl.WithMaxAttempts(3),
 		ensembl.WithRateLimit(15, time.Second),
 	)
